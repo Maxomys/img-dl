@@ -16,11 +16,9 @@ export function createImageWorker(connection: IORedis): Worker {
   return new Worker(
     'imageQueue',
     async (job: Job<ImageJobData, void>) => {
-      try {
-        await downloadAndSaveImage(job.data.imageUrl, job.data.imageId);
-      } catch (error) {
-        console.error(error);
-      }
+      const localFilePath = await downloadFile(job.data.imageUrl, job.data.imageId);
+
+      await saveFileDataToDb(localFilePath, job.data.imageId);
     },
     {
       connection,
@@ -42,49 +40,47 @@ export function createImageWorker(connection: IORedis): Worker {
     });
 }
 
-async function downloadAndSaveImage(url: string, id: number): Promise<void> {
+async function saveFileDataToDb(localFilePath: string, id: number): Promise<void> {
+  try {
+    await db
+      .update(ImageTable)
+      .set({
+        downloadedAt: new Date(),
+        localPath: localFilePath
+      })
+      .where(eq(ImageTable.id, id));
+  } catch (error) {
+    console.error('Error updating database:', error);
+    throw error;
+  }
+}
+
+async function downloadFile(url: string, id: number): Promise<string> {
   const imageExtension = path.extname(url);
   const localFileName = `${id}${imageExtension}`;
   const localFilePath = path.resolve(storagePath, localFileName);
 
-  try {
-    await fs.mkdir(storagePath, { recursive: true });
+  await fs.mkdir(storagePath, { recursive: true });
 
-    const response = await axios.get(url, { responseType: 'stream' });
+  const response = await axios.get(url, { responseType: 'stream' });
 
-    const writer = response.data.pipe(createWriteStream(localFilePath));
+  const writer = response.data.pipe(createWriteStream(localFilePath));
 
-    return new Promise<void>((resolve, reject) => {
-      writer.on('finish', async () => {
-        try {
-          await db
-            .update(ImageTable)
-            .set({
-              downloadedAt: new Date(),
-              localPath: localFilePath
-            })
-            .where(eq(ImageTable.id, id));
-
-          resolve();
-        } catch (dbError) {
-          console.error('Error updating database:', dbError);
-          reject(dbError);
-        }
-      });
-
-      writer.on('error', (err: Error) => {
-        console.error('Error saving image:', err);
-        reject(err);
-      });
-
-      response.data.on('error', (err: Error) => {
-        console.error('Error downloading image:', err);
-        reject(err);
-      });
+  return new Promise<string>((resolve, reject) => {
+    writer.on('finish', async () => {
+      resolve(localFilePath);
     });
-  } catch (error) {
-    console.error(`Error downloading or saving image with id: ${id}:`, error);
-  }
+
+    writer.on('error', (err: Error) => {
+      console.error('Error saving image:', err);
+      reject(err);
+    });
+
+    response.data.on('error', (err: Error) => {
+      console.error('Error downloading image:', err);
+      reject(err);
+    });
+  });
 }
 
 export interface ImageJobData {
