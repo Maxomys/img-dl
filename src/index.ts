@@ -1,6 +1,6 @@
 import express from 'express';
 import 'dotenv/config';
-import { imageRouter } from './api/v1/imageRoutes';
+import { imageRouter } from './api/v1/routes/imageRoutes';
 import bodyParser from 'body-parser';
 import IORedis from 'ioredis';
 import { createImageWorker } from './workers/imageWorker';

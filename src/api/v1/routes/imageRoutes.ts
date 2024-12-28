@@ -1,5 +1,5 @@
 import { Request, Router } from 'express';
-import { handleImagePost } from '../../handlers/imageHandlers';
+import { addImage, getImage } from '../../../handlers/imageHandlers';
 
 const imageRouter = Router();
 
@@ -9,7 +9,7 @@ imageRouter.post('/images', async (req: Request<any, any, { url: string | undefi
     return;
   }
 
-  const imageId = await handleImagePost(req.body.url);
+  const imageId = await addImage(req.body.url);
 
   const newImageUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}/${imageId}`;
 
@@ -18,6 +18,14 @@ imageRouter.post('/images', async (req: Request<any, any, { url: string | undefi
 
 imageRouter.get('/images', async (req, res) => {});
 
-imageRouter.get('/images/:id', async (req, res) => {});
+imageRouter.get('/images/:id', async (req, res) => {
+  const imageResponse = await getImage(parseInt(req.params.id));
+
+  res.status(200).json(imageResponse);
+});
+
+imageRouter.get('/images/dl/:id', async (req, res) => {
+  
+});
 
 export { imageRouter };
