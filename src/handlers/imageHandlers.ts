@@ -34,7 +34,7 @@ export async function getImage(imageId: number): Promise<ImageResponse> {
     status: image.downloadedAt ? ImageStatus.COMPLETED : ImageStatus.PENDING,
     source_url: image.sourceUrl,
     added_at: image.addedAt.toLocaleString(),
-    url: image.localPath,
+    url: '/images/static/' + image.fileName,
     downloaded_at: image.downloadedAt?.toLocaleString() ?? null
   };
 }

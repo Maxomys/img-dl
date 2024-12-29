@@ -16,9 +16,9 @@ export function createImageWorker(connection: IORedis): Worker {
   return new Worker(
     'imageQueue',
     async (job: Job<ImageJobData, void>) => {
-      const localFilePath = await downloadFile(job.data.imageUrl, job.data.imageId);
+      const fileName = await downloadFile(job.data.imageUrl, job.data.imageId);
 
-      await saveFileDataToDb(localFilePath, job.data.imageId);
+      await saveFileDataToDb(fileName, job.data.imageId);
     },
     {
       connection,
@@ -40,13 +40,13 @@ export function createImageWorker(connection: IORedis): Worker {
     });
 }
 
-async function saveFileDataToDb(localFilePath: string, id: number): Promise<void> {
+async function saveFileDataToDb(fileName: string, id: number): Promise<void> {
   try {
     await db
       .update(ImageTable)
       .set({
         downloadedAt: new Date(),
-        localPath: localFilePath
+        fileName
       })
       .where(eq(ImageTable.id, id));
   } catch (error) {
@@ -68,7 +68,7 @@ async function downloadFile(url: string, id: number): Promise<string> {
 
   return new Promise<string>((resolve, reject) => {
     writer.on('finish', async () => {
-      resolve(localFilePath);
+      resolve(`${id}${imageExtension}`);
     });
 
     writer.on('error', (err: Error) => {

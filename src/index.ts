@@ -13,7 +13,6 @@ const worker = createImageWorker(connection);
 
 process.on('SIGTERM', async () => {
   await worker.close();
-  console.log('worker closed :x')
 });
 
 const app = express();
@@ -21,6 +20,8 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use(imageRouter);
+
+app.use('/images/static/', express.static(process.env.STORAGE_PATH as string));
 
 app.listen(3000, () => {
   console.log(`Listening on port ${PORT}`);

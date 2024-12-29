@@ -24,8 +24,4 @@ imageRouter.get('/images/:id', async (req, res) => {
   res.status(200).json(imageResponse);
 });
 
-imageRouter.get('/images/dl/:id', async (req, res) => {
-  
-});
-
 export { imageRouter };
