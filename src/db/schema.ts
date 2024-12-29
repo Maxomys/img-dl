@@ -5,5 +5,5 @@ export const ImageTable = pgTable('image', {
   sourceUrl: varchar().notNull(),
   addedAt: timestamp().notNull(),
   downloadedAt: timestamp(),
-  localPath: varchar()
+  fileName: varchar()
 });
