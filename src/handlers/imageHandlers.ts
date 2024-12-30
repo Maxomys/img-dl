@@ -8,7 +8,12 @@ import { NotFoundError } from '../errors/apiError';
 
 const db = drizzle(process.env.DB_URL as string, { casing: 'snake_case' });
 
-const imageQueue = new Queue<ImageJobData>('imageQueue');
+const imageQueue = new Queue<ImageJobData>('imageQueue', {
+  connection: {
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT!)
+  }
+});
 
 export async function addImage(imageUrl: string, apiUrl: string): Promise<PostImageResponse> {
   const [{ imageId }] = await db

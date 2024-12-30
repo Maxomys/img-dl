@@ -6,7 +6,11 @@ import IORedis from 'ioredis';
 import { createImageWorker } from './workers/imageWorker';
 import { errorHandler } from './middleware/errorHandler';
 
-const connection = new IORedis({ maxRetriesPerRequest: null });
+const connection = new IORedis({
+  host: process.env.REDIS_HOST,
+  port: parseInt(process.env.REDIS_PORT!),
+  maxRetriesPerRequest: null
+});
 
 const worker = createImageWorker(connection);
 
