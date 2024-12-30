@@ -35,7 +35,7 @@ export async function getImage(imageId: number, apiUrl: string): Promise<ImageRe
     status: image.downloadedAt ? ImageStatus.COMPLETED : ImageStatus.PENDING,
     source_url: image.sourceUrl,
     added_at: image.addedAt.toLocaleString(),
-    url: `${apiUrl}/images/static/${image.fileName}`,
+    url: image.downloadedAt ? `${apiUrl}/images/static/${image.fileName}` : null,
     downloaded_at: image.downloadedAt?.toLocaleString() ?? null
   };
 }
@@ -54,13 +54,13 @@ export async function getImagesPage(page: number, limit: number, apiUrl: string)
     status: img.downloadedAt ? ImageStatus.COMPLETED : ImageStatus.PENDING,
     source_url: img.sourceUrl,
     added_at: img.addedAt.toLocaleString(),
-    url: `${apiUrl}/images/static/${img.fileName}`,
+    url: img.downloadedAt ? `${apiUrl}/images/static/${img.fileName}` : null,
     downloaded_at: img.downloadedAt?.toLocaleString() ?? null
   }));
 
   return {
     page: page,
-    pages: Math.floor(totalImagesCount / limit) + 1,
+    pages: Math.ceil(totalImagesCount / limit),
     limit: limit,
     total: totalImagesCount,
     data: imageResponses
