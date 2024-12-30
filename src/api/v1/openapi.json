@@ -1,0 +1,275 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Image Downloader API",
+    "version": "1.0.0",
+    "description": "API for downloading images."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/images": {
+      "post": {
+        "summary": "Add an image to the download queue",
+        "tags": [
+          "Images"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string",
+              "format": "url"
+            },
+            "required": true,
+            "description": "The URL of the image to download"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image added to the queue successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostImageResponse"
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "image_url": "http://localhost:3000/images/123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid URL)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidUrl": {
+                    "value": {
+                      "error": "Invalid URL provided"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get a list of images",
+        "tags": [
+          "Images"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "The page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "The number of images per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of images",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImagePage"
+                },
+                "examples": {
+                  "page1": {
+                    "value": {
+                      "page": 1,
+                      "pages": 5,
+                      "limit": 10,
+                      "total": 45,
+                      "data": [
+                        {
+                          "status": "completed",
+                          "source_url": "https://example.com/image1.jpg",
+                          "added_at": "2023-10-27T10:00:00Z",
+                          "url": "http://localhost:3000/images/static/image1.jpg",
+                          "downloaded_at": "2023-10-27T10:05:00Z"
+                        },
+                        {
+                          "status": "pending",
+                          "source_url": "https://example.com/image2.jpg",
+                          "added_at": "2023-10-27T10:10:00Z",
+                          "url": null,
+                          "downloaded_at": null
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images/{id}": {
+      "get": {
+        "summary": "Get details of an image",
+        "tags": [
+          "Images"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The ID of the image"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageResponse"
+                },
+                "examples": {
+                  "completed": {
+                    "value": {
+                      "status": "completed",
+                      "source_url": "https://example.com/image1.jpg",
+                      "added_at": "2023-10-27T10:00:00Z",
+                      "url": "http://localhost:3000/images/static/image1.jpg",
+                      "downloaded_at": "2023-10-27T10:05:00Z"
+                    }
+                  },
+                  "pending": {
+                    "value": {
+                      "status": "pending",
+                      "source_url": "https://example.com/image2.jpg",
+                      "added_at": "2023-10-27T10:10:00Z",
+                      "url": null,
+                      "downloaded_at": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "error": "Not found."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PostImageResponse": {
+        "type": "object",
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "format": "url",
+            "description": "The URL to check the image's status"
+          }
+        }
+      },
+      "ImageResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "completed"
+            ],
+            "description": "The status of the image download"
+          },
+          "source_url": {
+            "type": "string",
+            "format": "url",
+            "description": "The original URL of the image"
+          },
+          "added_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the image was added to the queue"
+          },
+          "url": {
+            "type": "string",
+            "format": "url",
+            "nullable": true,
+            "description": "The URL where the downloaded image is available (null if not downloaded)"
+          },
+          "downloaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time the image was downloaded (null if not downloaded)"
+          }
+        }
+      },
+      "ImagePage": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "The current page number"
+          },
+          "pages": {
+            "type": "integer",
+            "description": "The total number of pages"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The number of images per page"
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of images"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}

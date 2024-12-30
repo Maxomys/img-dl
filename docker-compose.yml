@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - app_storage:/app/storage
+    environment:
+      - PORT=3000
+      - DB_URL=postgresql://img_dl_admin:password@db:5432/img_dl
+      - STORAGE_PATH=/app/storage
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=img_dl_admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=img_dl
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+
+volumes:
+  postgres_data:
+  app_storage:
