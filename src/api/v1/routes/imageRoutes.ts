@@ -5,6 +5,8 @@ import { ImageRequest } from '../schema';
 
 const imageRouter = Router();
 
+imageRouter.use('/images/static', express.static(process.env.STORAGE_PATH as string));
+
 imageRouter.post('/images', async (req: Request<any, any, ImageRequest, any, any>, res) => {
   if (!req.body || !req.body.url) {
     res.status(400).send();
@@ -29,15 +31,17 @@ imageRouter.get('/images', async (req, res) => {
     limit = parseInt(req.query.limit);
   }
 
-  const imagesPage = await getImagesPage(page, limit);
+  const apiUrl = `${req.protocol}://${req.get('host')}`;
+
+  const imagesPage = await getImagesPage(page, limit, apiUrl);
 
   res.status(200).json(imagesPage);
 });
 
-imageRouter.use('/images/static/', express.static(process.env.STORAGE_PATH as string));
-
 imageRouter.get('/images/:id', async (req, res) => {
-  const imageResponse = await getImage(parseInt(req.params.id));
+  const apiUrl = `${req.protocol}://${req.get('host')}`;
+
+  const imageResponse = await getImage(parseInt(req.params.id), apiUrl);
 
   res.status(200).json(imageResponse);
 });

@@ -24,7 +24,7 @@ export async function addImage(imageUrl: string): Promise<number> {
   return imageId;
 }
 
-export async function getImage(imageId: number): Promise<ImageResponse> {
+export async function getImage(imageId: number, apiUrl: string): Promise<ImageResponse> {
   const [image] = await db.select().from(ImageTable).where(eq(ImageTable.id, imageId)).limit(1);
 
   if (!image) {
@@ -35,12 +35,12 @@ export async function getImage(imageId: number): Promise<ImageResponse> {
     status: image.downloadedAt ? ImageStatus.COMPLETED : ImageStatus.PENDING,
     source_url: image.sourceUrl,
     added_at: image.addedAt.toLocaleString(),
-    url: '/images/static/' + image.fileName,
+    url: `${apiUrl}/images/static/${image.fileName}`,
     downloaded_at: image.downloadedAt?.toLocaleString() ?? null
   };
 }
 
-export async function getImagesPage(page: number, limit: number): Promise<Page<ImageResponse>> {
+export async function getImagesPage(page: number, limit: number, apiUrl: string): Promise<Page<ImageResponse>> {
   const images = await db
     .select()
     .from(ImageTable)
@@ -54,7 +54,7 @@ export async function getImagesPage(page: number, limit: number): Promise<Page<I
     status: img.downloadedAt ? ImageStatus.COMPLETED : ImageStatus.PENDING,
     source_url: img.sourceUrl,
     added_at: img.addedAt.toLocaleString(),
-    url: '/imgs/static/' + img.fileName,
+    url: `${apiUrl}/images/static/${img.fileName}`,
     downloaded_at: img.downloadedAt?.toLocaleString() ?? null
   }));
 
