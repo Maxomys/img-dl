@@ -4,6 +4,7 @@ import { imageRouter } from './api/v1/routes/imageRoutes';
 import bodyParser from 'body-parser';
 import IORedis from 'ioredis';
 import { createImageWorker } from './workers/imageWorker';
+import { errorHandler } from './middleware/errorHandler';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -18,6 +19,8 @@ process.on('SIGTERM', async () => {
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use(errorHandler);
 
 app.use(imageRouter);
 

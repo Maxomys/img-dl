@@ -1,10 +1,11 @@
 import { Request, Router } from 'express';
 import { addImage, getImage, getImagesPage } from '../../../handlers/imageHandlers';
 import express from 'express';
+import { ImageRequest } from '../schema';
 
 const imageRouter = Router();
 
-imageRouter.post('/images', async (req: Request<any, any, { url: string | undefined }, any, any>, res) => {
+imageRouter.post('/images', async (req: Request<any, any, ImageRequest, any, any>, res) => {
   if (!req.body || !req.body.url) {
     res.status(400).send();
     return;
