@@ -16,7 +16,7 @@ process.on('SIGTERM', async () => {
   await worker.close();
 });
 
-const app = express();
+export const app = express();
 
 app.use(bodyParser.json());
 
