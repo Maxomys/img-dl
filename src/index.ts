@@ -21,8 +21,6 @@ app.use(bodyParser.json());
 
 app.use(imageRouter);
 
-app.use('/images/static/', express.static(process.env.STORAGE_PATH as string));
-
 app.listen(3000, () => {
   console.log(`Listening on port ${PORT}`);
 });

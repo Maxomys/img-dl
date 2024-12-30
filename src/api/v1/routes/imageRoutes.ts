@@ -1,5 +1,6 @@
 import { Request, Router } from 'express';
-import { addImage, getImage } from '../../../handlers/imageHandlers';
+import { addImage, getImage, getImagesPage } from '../../../handlers/imageHandlers';
+import express from 'express';
 
 const imageRouter = Router();
 
@@ -16,7 +17,23 @@ imageRouter.post('/images', async (req: Request<any, any, { url: string | undefi
   res.status(200).json({ image_url: newImageUrl });
 });
 
-imageRouter.get('/images', async (req, res) => {});
+imageRouter.get('/images', async (req, res) => {
+  let page = 1;
+  let limit = 10;
+
+  if (req.query.page && typeof req.query.page === 'string') {
+    page = parseInt(req.query.page);
+  }
+  if (req.query.limit && typeof req.query.limit === 'string') {
+    limit = parseInt(req.query.limit);
+  }
+
+  const imagesPage = await getImagesPage(page, limit);
+
+  res.status(200).json(imagesPage);
+});
+
+imageRouter.use('/images/static/', express.static(process.env.STORAGE_PATH as string));
 
 imageRouter.get('/images/:id', async (req, res) => {
   const imageResponse = await getImage(parseInt(req.params.id));

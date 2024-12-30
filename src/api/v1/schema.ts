@@ -14,3 +14,11 @@ export enum ImageStatus {
   PENDING = 'pending',
   COMPLETED = 'completed'
 }
+
+export interface Page<T> {
+  page: number;
+  pages: number;
+  limit: number;
+  total: number;
+  data: T[];
+}
