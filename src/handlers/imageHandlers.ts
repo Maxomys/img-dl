@@ -4,6 +4,7 @@ import { ImageTable } from '../db/schema';
 import { ImageJobData } from '../workers/imageWorker';
 import { asc, count, eq } from 'drizzle-orm';
 import { ImageResponse, ImageStatus, Page } from '../api/v1/schema';
+import { NotFoundError } from '../ApiError';
 
 const db = drizzle(process.env.DB_URL as string, { casing: 'snake_case' });
 
@@ -27,7 +28,7 @@ export async function getImage(imageId: number): Promise<ImageResponse> {
   const [image] = await db.select().from(ImageTable).where(eq(ImageTable.id, imageId)).limit(1);
 
   if (!image) {
-    throw new Error('Image not found for id: ' + imageId);
+    throw new NotFoundError();
   }
 
   return {

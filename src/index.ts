@@ -20,9 +20,9 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use(errorHandler);
-
 app.use(imageRouter);
+
+app.use(errorHandler);
 
 app.listen(3000, () => {
   console.log(`Listening on port ${PORT}`);
