@@ -4,7 +4,7 @@ import { ImageTable } from '../db/schema';
 import { ImageJobData } from '../workers/imageWorker';
 import { asc, count, eq } from 'drizzle-orm';
 import { ImageResponse, ImageStatus, Page } from '../api/v1/schema';
-import { NotFoundError } from '../ApiError';
+import { NotFoundError } from '../errors/apiError';
 
 const db = drizzle(process.env.DB_URL as string, { casing: 'snake_case' });
 
