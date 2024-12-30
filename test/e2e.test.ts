@@ -61,7 +61,7 @@ describe('Image API E2E Tests', () => {
 
   describe('POST /images', () => {
     it('should download an image and return status URL', async () => {
-      const response = await request(app).post('/images').send({ url: imageUrl });
+      const response = await request(app).post('/images').query({ url: imageUrl }).send();
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('image_url');

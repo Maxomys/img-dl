@@ -1,23 +1,23 @@
 import { Request, Router } from 'express';
 import { addImage, getImage, getImagesPage } from '../../../handlers/imageHandlers';
 import express from 'express';
-import { ImageRequest } from '../schema';
+import { ImageRequestQuery } from '../schema';
 
 const imageRouter = Router();
 
 imageRouter.use('/images/static', express.static(process.env.STORAGE_PATH as string));
 
-imageRouter.post('/images', async (req: Request<any, any, ImageRequest, any, any>, res) => {
-  if (!req.body || !req.body.url) {
+imageRouter.post('/images', async (req: Request<any, any, any, ImageRequestQuery, any>, res) => {
+  if (!req.query.url && typeof !req.query.url !== 'string') {
     res.status(400).send();
     return;
   }
 
-  const imageId = await addImage(req.body.url);
+  const apiUrl = `${req.protocol}://${req.get('host')}`;
 
-  const newImageUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}/${imageId}`;
+  const postImageResponse = await addImage(req.query.url, apiUrl);
 
-  res.status(200).json({ image_url: newImageUrl });
+  res.status(200).json(postImageResponse);
 });
 
 imageRouter.get('/images', async (req, res) => {

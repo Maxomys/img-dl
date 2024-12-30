@@ -3,14 +3,14 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { ImageTable } from '../db/schema';
 import { ImageJobData } from '../workers/imageWorker';
 import { asc, count, eq } from 'drizzle-orm';
-import { ImageResponse, ImageStatus, Page } from '../api/v1/schema';
+import { ImageResponse, ImageStatus, Page, PostImageResponse } from '../api/v1/schema';
 import { NotFoundError } from '../errors/apiError';
 
 const db = drizzle(process.env.DB_URL as string, { casing: 'snake_case' });
 
 const imageQueue = new Queue<ImageJobData>('imageQueue');
 
-export async function addImage(imageUrl: string): Promise<number> {
+export async function addImage(imageUrl: string, apiUrl: string): Promise<PostImageResponse> {
   const [{ imageId }] = await db
     .insert(ImageTable)
     .values({
@@ -21,7 +21,7 @@ export async function addImage(imageUrl: string): Promise<number> {
 
   await imageQueue.add('imageDownload', { imageUrl, imageId });
 
-  return imageId;
+  return { image_url: `${apiUrl}/images/${imageId}` };
 }
 
 export async function getImage(imageId: number, apiUrl: string): Promise<ImageResponse> {

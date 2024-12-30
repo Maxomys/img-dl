@@ -1,5 +1,9 @@
-export interface ImageRequest {
-  url: string | undefined;
+export interface ImageRequestQuery {
+  url: string;
+}
+
+export interface PostImageResponse {
+  image_url: string;
 }
 
 export interface ImageResponse {
