@@ -2,8 +2,12 @@ import { Request, Router } from 'express';
 import { addImage, getImage, getImagesPage } from '../../../handlers/imageHandlers';
 import express from 'express';
 import { ImageRequestQuery } from '../schema';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './../openapi.json';
 
 const imageRouter = Router();
+
+imageRouter.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 imageRouter.use('/images/static', express.static(process.env.STORAGE_PATH as string));
 
