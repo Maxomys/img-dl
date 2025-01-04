@@ -31,7 +31,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Image added to the queue successfully",
             "content": {
               "application/json": {
@@ -204,7 +204,7 @@
           "image_url": {
             "type": "string",
             "format": "url",
-            "description": "The URL to check the image's status"
+            "description": "The URL to get the image's details and check downloading status"
           }
         }
       },
