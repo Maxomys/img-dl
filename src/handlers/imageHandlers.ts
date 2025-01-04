@@ -1,17 +1,23 @@
 import { Queue } from 'bullmq';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { ImageTable } from '../db/schema';
 import { ImageJobData } from '../workers/imageWorker';
 import { asc, count, eq } from 'drizzle-orm';
-import { ImageResponse, ImageStatus, Page, PostImageResponse } from '../api/v1/schema';
+import { GetImageResponse, ImageStatus, Page, PostImageResponse } from '../api/v1/schema';
 import { NotFoundError } from '../errors/apiError';
-
-const db = drizzle(process.env.DB_URL as string, { casing: 'snake_case' });
+import { db } from '../db/db';
 
 const imageQueue = new Queue<ImageJobData>('imageQueue', {
   connection: {
     host: process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT!)
+  },
+  defaultJobOptions: {
+    removeOnComplete: 1000,
+    removeOnFail: 5000,
+    backoff: {
+      type: 'exponential',
+      delay: 2000
+    }
   }
 });
 
@@ -29,7 +35,7 @@ export async function addImage(imageUrl: string, apiUrl: string): Promise<PostIm
   return { image_url: `${apiUrl}/images/${imageId}` };
 }
 
-export async function getImage(imageId: number, apiUrl: string): Promise<ImageResponse> {
+export async function getImage(imageId: number, apiUrl: string): Promise<GetImageResponse> {
   const [image] = await db.select().from(ImageTable).where(eq(ImageTable.id, imageId)).limit(1);
 
   if (!image) {
@@ -45,7 +51,7 @@ export async function getImage(imageId: number, apiUrl: string): Promise<ImageRe
   };
 }
 
-export async function getImagesPage(page: number, limit: number, apiUrl: string): Promise<Page<ImageResponse>> {
+export async function getImagesPage(page: number, limit: number, apiUrl: string): Promise<Page<GetImageResponse>> {
   const images = await db
     .select()
     .from(ImageTable)
@@ -55,7 +61,7 @@ export async function getImagesPage(page: number, limit: number, apiUrl: string)
 
   const [{ totalImagesCount }] = await db.select({ totalImagesCount: count() }).from(ImageTable);
 
-  const imageResponses: ImageResponse[] = images.map((img) => ({
+  const imageResponses: GetImageResponse[] = images.map((img) => ({
     status: img.downloadedAt ? ImageStatus.COMPLETED : ImageStatus.PENDING,
     source_url: img.sourceUrl,
     added_at: img.addedAt.toLocaleString(),

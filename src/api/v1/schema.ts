@@ -1,4 +1,4 @@
-export interface ImageRequestQuery {
+export interface ImageRequestQuery extends qs.ParsedQs{
   url: string;
 }
 
@@ -6,7 +6,7 @@ export interface PostImageResponse {
   image_url: string;
 }
 
-export interface ImageResponse {
+export interface GetImageResponse {
   status: ImageStatus;
   source_url: string;
   added_at: string;

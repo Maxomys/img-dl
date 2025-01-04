@@ -4,13 +4,11 @@ import path from 'path';
 import fs from 'fs/promises';
 import { createWriteStream } from 'fs';
 import axios from 'axios';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { ImageTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { db } from '../db/db';
 
 const storagePath = process.env.STORAGE_PATH as string;
-
-const db = drizzle(process.env.DB_URL as string, { casing: 'snake_case' });
 
 export function createImageWorker(connection: IORedis): Worker {
   return new Worker(
