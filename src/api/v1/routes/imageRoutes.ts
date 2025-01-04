@@ -4,6 +4,7 @@ import express from 'express';
 import { ImageRequestQuery } from '../schema';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './../openapi.json';
+import isValidImageUrl from '../../../helpers/isValidImageUrl';
 
 const imageRouter = Router();
 
@@ -12,16 +13,19 @@ imageRouter.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 imageRouter.use('/images/static', express.static(process.env.STORAGE_PATH as string));
 
 imageRouter.post('/images', async (req: Request<any, any, any, ImageRequestQuery, any>, res) => {
-  if (!req.query.url && typeof !req.query.url !== 'string') {
+  if (typeof req.query.url !== 'string') {
     res.status(400).send();
     return;
   }
 
-  const apiUrl = `${req.protocol}://${req.get('host')}`;
+  if (!isValidImageUrl(req.query.url)) {
+    res.status(400).json({ error: 'Invalid image URL format or not a recognized image link.' });
+    return;
+  }
 
-  const postImageResponse = await addImage(req.query.url, apiUrl);
+  const postImageResponse = await addImage(req.query.url, getApiUrl(req));
 
-  res.status(200).json(postImageResponse);
+  res.status(201).json(postImageResponse);
 });
 
 imageRouter.get('/images', async (req, res) => {
@@ -35,19 +39,19 @@ imageRouter.get('/images', async (req, res) => {
     limit = parseInt(req.query.limit);
   }
 
-  const apiUrl = `${req.protocol}://${req.get('host')}`;
-
-  const imagesPage = await getImagesPage(page, limit, apiUrl);
+  const imagesPage = await getImagesPage(page, limit, getApiUrl(req));
 
   res.status(200).json(imagesPage);
 });
 
 imageRouter.get('/images/:id', async (req, res) => {
-  const apiUrl = `${req.protocol}://${req.get('host')}`;
-
-  const imageResponse = await getImage(parseInt(req.params.id), apiUrl);
+  const imageResponse = await getImage(parseInt(req.params.id), getApiUrl(req));
 
   res.status(200).json(imageResponse);
 });
+
+function getApiUrl(req: Request) {
+  return `${req.protocol}://${req.get('host')}`;
+}
 
 export { imageRouter };

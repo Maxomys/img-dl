@@ -63,7 +63,7 @@ describe('Image API E2E Tests', () => {
     it('should download an image and return status URL', async () => {
       const response = await request(app).post('/images').query({ url: imageUrl }).send();
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('image_url');
 
       // wait for the worker to process the job
@@ -74,13 +74,20 @@ describe('Image API E2E Tests', () => {
       expect(files[0]).not.toBe(undefined);
     }, 5000);
 
+    it('should return 400 if URL is of a file other than an image', async () => {
+      const response = await request(app).post('/images').query({ url: 'http://localhost:8081/puppy.xml' }).send();
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
+
     it('should return 400 if URL is missing', async () => {
-      const response = await request(app).post('/images').send({});
+      const response = await request(app).post('/images').send();
 
       expect(response.status).toBe(400);
     });
 
-    it('should return 400 if request body is missing', async () => {
+    it('should return 400 if query param is missing', async () => {
       const response = await request(app).post('/images');
 
       expect(response.status).toBe(400);
