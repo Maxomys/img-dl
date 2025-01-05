@@ -7,6 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "test:e2e": "cross-env DOTENV_CONFIG_PATH=./test.env jest --setupFiles dotenv/config",
     "build": "tsc",
+    "start": "node ./dist/src/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
