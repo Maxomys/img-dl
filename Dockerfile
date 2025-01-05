@@ -14,7 +14,7 @@ COPY . .
 
 VOLUME /app/storage
 
-CMD ["./startup.sh"]
+CMD ["npm", "run", "dev"]
 
 
 FROM base AS build
@@ -44,4 +44,4 @@ COPY --from=build /app/dist ./dist
 
 VOLUME /app/storage
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/index.js"]

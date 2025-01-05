@@ -16,6 +16,11 @@ services:
       - NODE_ENV=development
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    command: >
+      sh -c "
+        npm run db:migrate && 
+        npm run dev
+      "
     depends_on:
       - db
       - redis
