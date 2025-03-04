@@ -1,0 +1,1 @@
+ALTER TABLE "image" RENAME COLUMN "local_path" TO "file_name";
